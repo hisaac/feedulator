@@ -1,0 +1,75 @@
+[settings]
+experimental = true
+activate_aggressive = true
+
+[settings.python]
+uv_venv_auto = true
+
+[tools]
+actionlint = "latest"
+hk = "latest"
+pkl = "latest"
+python = { version = "latest", uv = true }
+ruff = "latest"
+tombi = "latest"
+ty = "latest"
+uv = "latest"
+yamlfmt = "latest"
+yamllint = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+
+[hooks]
+postinstall = { task = "bootstrap" }
+
+[tasks.bootstrap]
+run = ["hk install --mise", { task = "update-hk-import" }, "uv sync"]
+
+[tasks.update]
+alias = ["upd"]
+run = [
+  "mise upgrade",
+  "mise exec -- uv sync --upgrade",
+  { task = "update-hk-import" },
+]
+
+[tasks.upgrade]
+alias = ["upg"]
+run = [
+  "mise upgrade --bump",
+  "mise exec -- uv sync --upgrade",
+  { task = "update-hk-import" },
+]
+
+[tasks.update-hk-import]
+run = "scripts/update-hk-import.bash"
+
+[tasks.run]
+alias = ["feedulator", "r"]
+run = "uv run python -m feedulator.cli"
+
+[tasks.build]
+alias = "b"
+run = "uv build"
+
+[tasks.check]
+alias = ["lint", "chk"]
+run = "hk check --all"
+
+[tasks.fix]
+alias = ["format"]
+run = "hk fix --all"
+
+[tasks.clean]
+run = [
+  "rm -rf dist",
+  "rm -rf build",
+  "rm -rf .ruff_cache",
+  "rm -rf src/getart.egg-info",
+  "rm -rf .pytest_cache",
+  "find . -name '__pycache__' -type d -prune -exec rm -rf {} +",
+]
+
+[tasks.nuke]
+depends = ["clean"]
+run = ["rm -rf .venv", "uv cache prune"]
